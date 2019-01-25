@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
+        <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
+        <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+        <link rel="stylesheet" href="styles.css" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Tic Tac Toe</title>
+    </head>
+    <body>
+        <div id="app" />
+        <script type="text/babel">
+
+        class App extends React.Component {
+            constructor(props) {
+                super(props);
+
+                this.state = {
+                    board: [[null, null, null], 
+                            [null, null, null], 
+                            [null, null, null]],
+                    x: true,
+                    winner: null
+                };
+            }
+
+            render() {
+                let rows = [];
+                for (let i = 0; i < 3; i++) {
+                    const row = this.state.board[i].map((cell, j) => {
+                        return (
+                            <td>{ cell || <a data-row={i} data-col={j} onClick={this.makeMove}>Play {this.state.x ? "X" : "O"} here.</a>}</td>
+                        )
+                    });
+                    rows.push(<tr>{row}</tr>);
+                }
+                
+                return (
+                    <div>
+                        <h1>Tic Tac Toe</h1>
+                        <h2>{this.state.winner ? `Win: ${this.state.winner}` : `Turn: ${this.state.x ? "X" : "O"}`} </h2>
+                        <table>
+                            <thead></thead>
+                            <tbody>
+                                {rows}
+                            </tbody>
+                        </table>
+                        <button onClick={this.reset}>Reset</button>
+                    </div>
+                );
+            }
+
+            makeMove = (event) => {
+                if (this.state.winner) {
+                    return;
+                }
+                event.persist();
+                if (!this.state.board[event.target.dataset.row][event.target.dataset.col]) {
+                    // can make move here
+                    const row = parseInt(event.target.dataset.row);
+                    const col = parseInt(event.target.dataset.col);
+
+                    this.setState((state => {
+                        const newBoard = [...state.board]
+                        newBoard[row].splice(col, 1, state.x ? "X" : "O");
+                        return {
+                            board: newBoard,
+                            x: !state.x
+                        }
+                    }), () => {this.checkWin(row, col)});
+                }
+            }
+
+            checkWin = (r, c) => {
+                // check tie
+                const check = this.state.board.map((row) => {
+                    if (row.indexOf(null) != -1) {
+                        return row.indexOf(null);
+                    }
+                });
+                if (this.threeinrow(check, undefined)) {
+                    this.setState({
+                        winner: "tie"
+                    });
+                    return;
+                }
+                // this is who just moved
+                const move = this.state.x ? "O" : "X";
+
+                // check horizontal
+                this.checkThree(this.state.board[r], move);
+
+                // check horizontal
+                const vert = this.state.board.map((row) => {
+                    return row[c];
+                });
+                this.checkThree(vert, move);
+
+                // check diagonals
+                const drdiag = this.state.board.map((row, i) => {
+                    return row[r + i - c];
+                });
+                this.checkThree(drdiag, move);
+
+                const dldiag = this.state.board.map((row, i) => {
+                    return row[r - i + c];
+                });
+                this.checkThree(dldiag, move);
+            }
+
+            setWin = (winner) => {
+                this.setState({
+                    winner: winner,
+                    x: winner == "X" ? true : false
+                });
+            }
+
+            reset = () => {
+                this.setState({
+                    board: [[null, null, null], 
+                            [null, null, null], 
+                            [null, null, null]],
+                    x: true,
+                    winner: null
+                });
+            }
+
+            threeinrow = (array, element) => {
+                for (let i = 0; i < array.length - 2; i++) {
+                    let count = 0;
+                    for (let j = 0; j < 3; j++) {
+                        if (array.slice(i, i+3)[j] == element) {
+                            count++;
+                        }
+                    }  
+                    if (count == 3) {
+                        return true;
+                    }      
+                }
+                return false;
+            }
+
+            checkThree = (array, move) => {
+                if (this.threeinrow(array, move)) {
+                    this.setWin(move);
+                    return;
+                }
+            }
+        }
+
+        ReactDOM.render(<App />, document.querySelector("#app"));
+
+        </script>
+    </body>
+</html>
