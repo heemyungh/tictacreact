@@ -30,7 +30,7 @@
                 for (let i = 0; i < 3; i++) {
                     const row = this.state.board[i].map((cell, j) => {
                         return (
-                            <td>{ cell || <a data-row={i} data-col={j} onClick={this.makeMove}>Play {this.state.x ? "X" : "O"} here.</a>}</td>
+                            <td>{ cell || (this.state.winner? "" : <a data-row={i} data-col={j} onClick={this.makeMove}>Play {this.state.x ? "X" : "O"} here.</a>)}</td>
                         )
                     });
                     rows.push(<tr>{row}</tr>);
@@ -39,7 +39,7 @@
                 return (
                     <div>
                         <h1>Tic Tac Toe</h1>
-                        <h2>{this.state.winner ? `Win: ${this.state.winner}` : `Turn: ${this.state.x ? "X" : "O"}`} </h2>
+                        <h2>{this.state.winner ? (this.state.winner == "tie" ? "You tied!" : `Win: ${this.state.winner}`) : `Turn: ${this.state.x ? "X" : "O"}`} </h2>
                         <table>
                             <thead></thead>
                             <tbody>
@@ -111,8 +111,7 @@
 
             setWin = (winner) => {
                 this.setState({
-                    winner: winner,
-                    x: winner == "X" ? true : false
+                    winner: winner
                 });
             }
 
